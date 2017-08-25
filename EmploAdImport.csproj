@@ -60,6 +60,7 @@
     <Compile Include="EmploApi\Models\ImportUsersRequestModel.cs" />
     <Compile Include="EmploApi\Models\ImportUsersResponseModel.cs" />
     <Compile Include="EmploApi\ApiConfiguration.cs" />
+    <Compile Include="EmploApi\Models\UpdateUnitResult.cs" />
     <Compile Include="Importer\EnumerableExtensions.cs" />
     <Compile Include="Ldap\LdapAccountConfiguration.cs" />
     <Compile Include="Ldap\LdapImportConfiguration.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="Importer\ImportLogic.cs" />
     <Compile Include="Ldap\LdapClient.cs" />
     <Compile Include="Ldap\PropertyMapping.cs" />
+    <Compile Include="Ldap\DirectorySearcherExtension.cs" />
     <Compile Include="Validators\CommandValidator.cs" />
     <Compile Include="Validators\SettingsValidator.cs" />
     <Compile Include="Log\BaseLogger.cs" />
@@ -81,7 +83,9 @@
     <Compile Include="EmploApi\AuthorizationManager.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>

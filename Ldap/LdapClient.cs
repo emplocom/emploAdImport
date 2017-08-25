@@ -35,8 +35,8 @@ namespace EmploAdImport.Ldap
                     }
 
                     _logger.WriteLine("Getting users' data from Active Directory...");
-
-                    var resultCollection = search.FindAll();
+                    search.PageSize = 1000;
+                    var resultCollection = search.SafeFindAll();
                     var importedRows = new List<UserDataRow>();
                     
                     foreach (SearchResult searchResult in resultCollection)
@@ -110,4 +110,6 @@ namespace EmploAdImport.Ldap
             return root;
         }
     }
+
+
 }

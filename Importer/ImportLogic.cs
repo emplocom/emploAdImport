@@ -58,12 +58,13 @@ namespace EmploAdImport.Importer
                     Environment.Exit(0);
                 }
 
-                _logger.WriteLine("Sending employee data to emplo (in chunks in size of 10)");
+                int chunkSize = GetChunkSize();
+                _logger.WriteLine(String.Format("Sending employee data to emplo (in chunks in size of {0})", chunkSize));
 
                 ImportUsersRequestModel importModel = new ImportUsersRequestModel();
 
                 // first, send data without superiors
-                foreach (var chunk in importUsersRequestModel.Rows.Chunk(10))
+                foreach (var chunk in importUsersRequestModel.Rows.Chunk(chunkSize))
                 {
                     importModel.Rows = chunk.ToList();
                     var serializedData = JsonConvert.SerializeObject(importModel);
@@ -94,6 +95,23 @@ namespace EmploAdImport.Importer
                         if (finishImportResponse.BlockedUserIds != null && finishImportResponse.BlockedUserIds.Any())
                         {
                             _logger.WriteLine("Blocked user id's: " + String.Join(", ", finishImportResponse.BlockedUserIds));
+                        }
+
+                        if (finishImportResponse.UpdateUnitResults != null && finishImportResponse.UpdateUnitResults.Any())
+                        {
+                            _logger.WriteLine("Units tree was updated:");
+                            foreach (var message in finishImportResponse.UpdateUnitResults)
+                            {
+                                if (message.IsError)
+                                {
+                                    _logger.WriteLine(String.Format("Unit update error: {0}", message.Message));
+                                }
+                                else
+                                {
+                                    _logger.WriteLine(String.Format("Unit updated: unit {0} was updated, old parent={1}, new parent={2}, message: {3}",
+                                        message.UpdatedUnitId, message.OldParentId, message.NewParentId, message.Message));
+                                }
+                            }
                         }
                     }
                 }
@@ -154,6 +172,15 @@ namespace EmploAdImport.Importer
                     }
                 }
             }
+        }
+
+        private int GetChunkSize()
+        {
+            string sizeString = ConfigurationManager.AppSettings["ChunkSize"] ?? "";
+            int size;
+            if (Int32.TryParse(sizeString, out size))
+                return size;
+            return 5;
         }
     }
 }

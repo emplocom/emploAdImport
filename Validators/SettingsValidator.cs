@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Configuration;
 using EmploAdImport.AttributeMappingsModel;
-using EmploAdImport.EmploApi;
-using EmploAdImport.Log;
+using EmploApiSDK.Logger;
 
 namespace EmploAdImport.Validators
 {
@@ -11,21 +10,21 @@ namespace EmploAdImport.Validators
         public static void ValidateSettings()
         {
             var isValid = true;
-            var baseUrl = ApiConfiguration.EmploUrl;
+            var baseUrl = ConfigurationManager.AppSettings["EmploUrl"];
             if (String.IsNullOrEmpty(baseUrl))
             {
                 LoggerFactory.Instance.WriteLine("EmploUrl is empty. Example url : https://example.emplo.com");
                 isValid = false;
             }
 
-            var emploLogin = ApiConfiguration.Login;
+            var emploLogin = ConfigurationManager.AppSettings["Login"];
             if (String.IsNullOrEmpty(emploLogin))
             {
                 LoggerFactory.Instance.WriteLine("Login to emplo is empty");
                 isValid = false;
             }
 
-            var emploPassword = ApiConfiguration.Password;
+            var emploPassword = ConfigurationManager.AppSettings["Password"];
             if (String.IsNullOrEmpty(emploPassword))
             {
                 LoggerFactory.Instance.WriteLine("Password to emplo is empty");

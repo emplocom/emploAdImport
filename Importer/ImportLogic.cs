@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
-using EmploAdImport.EmploApi;
-using EmploAdImport.EmploApi.Models;
 using EmploAdImport.Ldap;
-using EmploAdImport.Log;
 using Newtonsoft.Json;
+using EmploApiSDK.Logger;
+using EmploApiSDK;
+using EmploApiSDK.Models;
 
 namespace EmploAdImport.Importer
 {
@@ -16,18 +16,31 @@ namespace EmploAdImport.Importer
     {
         private readonly ILogger _logger;
         private readonly ApiClient _apiClient;
+        private readonly ApiConfiguration _apiConfiguration;
 
         public ImportLogic(ILogger logger)
         {
             _logger = logger;
-            _apiClient = new ApiClient(_logger);
+
+            _apiConfiguration = new ApiConfiguration()
+            {
+                EmploUrl = ConfigurationManager.AppSettings["EmploUrl"],
+                ApiPath = ConfigurationManager.AppSettings["ApiPath"] ?? "apiv2",
+                Login = ConfigurationManager.AppSettings["Login"],
+                Password = ConfigurationManager.AppSettings["Password"],
+            };
+
+            _apiClient = new ApiClient(_logger, _apiConfiguration);
         }
          
         public void ImportUsers()
         {
             try
             {
-                ImportUsersRequestModel importUsersRequestModel = new ImportUsersRequestModel();
+                var importMode = ConfigurationManager.AppSettings["ImportMode"];
+                var requireRegistrationForNewEmployees = ConfigurationManager.AppSettings["RequireRegistrationForNewEmployees"];
+
+                ImportUsersRequestModel importUsersRequestModel = new ImportUsersRequestModel(importMode, requireRegistrationForNewEmployees);
 
                 string importFilePath = ConfigurationManager.AppSettings["ImportFromFilePath"];
                 if (!string.IsNullOrWhiteSpace(importFilePath))
@@ -61,14 +74,14 @@ namespace EmploAdImport.Importer
                 int chunkSize = GetChunkSize();
                 _logger.WriteLine(String.Format("Sending employee data to emplo (in chunks in size of {0})", chunkSize));
 
-                ImportUsersRequestModel importModel = new ImportUsersRequestModel();
+                ImportUsersRequestModel importModel = new ImportUsersRequestModel(importMode, requireRegistrationForNewEmployees);
 
                 // first, send data without superiors
                 foreach (var chunk in importUsersRequestModel.Rows.Chunk(chunkSize))
                 {
                     importModel.Rows = chunk.ToList();
                     var serializedData = JsonConvert.SerializeObject(importModel);
-                    var importValidationSummary = _apiClient.SendPost<ImportUsersResponseModel>(serializedData, ApiConfiguration.ImportUsersUrl);
+                    var importValidationSummary = _apiClient.SendPost<ImportUsersResponseModel>(serializedData, _apiConfiguration.ImportUsersUrl);
                     if (importValidationSummary.ImportStatusCode != ImportStatusCode.Ok)
                     {
                         _logger.WriteLine("Import action returned error status: " + importValidationSummary.ImportStatusCode);
@@ -81,10 +94,10 @@ namespace EmploAdImport.Importer
                 if (importUsersRequestModel.Rows.Any())
                 {
                     _logger.WriteLine("Finishing import...");
-                    FinishImportRequestModel requestModel = new FinishImportRequestModel();
+                    FinishImportRequestModel requestModel = new FinishImportRequestModel(ConfigurationManager.AppSettings["BlockSkippedUsers"]);
                     requestModel.ImportId = importModel.ImportId;
                     var serializedData = JsonConvert.SerializeObject(requestModel);
-                    var finishImportResponse = _apiClient.SendPost<FinishImportResponseModel>(serializedData, ApiConfiguration.FinishImportUrl);
+                    var finishImportResponse = _apiClient.SendPost<FinishImportResponseModel>(serializedData, _apiConfiguration.FinishImportUrl);
                     if (finishImportResponse.ImportStatusCode != ImportStatusCode.Ok)
                     {
                         _logger.WriteLine("FinishImport action returned error status: " + finishImportResponse.ImportStatusCode);
@@ -127,7 +140,7 @@ namespace EmploAdImport.Importer
         public void BlockUser(string nameId)
         {
             _logger.WriteLine(String.Format("Sending request to block user {0}", nameId));
-            var statusCode = _apiClient.SendPost<HttpStatusCode>(JsonConvert.SerializeObject(nameId), ApiConfiguration.BlockUserUrl);
+            var statusCode = _apiClient.SendPost<HttpStatusCode>(JsonConvert.SerializeObject(nameId), _apiConfiguration.BlockUserUrl);
             _logger.WriteLine("Response: " + statusCode);
         }
 

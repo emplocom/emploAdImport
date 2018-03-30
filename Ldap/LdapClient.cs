@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
 using System.Linq;
-using EmploAdImport.EmploApi.Models;
-using EmploAdImport.Log;
+using EmploApiSDK.Logger;
+using EmploApiSDK.Models;
 
 namespace EmploAdImport.Ldap
 {

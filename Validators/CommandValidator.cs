@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using EmploAdImport.Log;
+using EmploApiSDK.Logger;
 
 namespace EmploAdImport.Validators
 {

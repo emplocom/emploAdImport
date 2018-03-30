@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>EmploAdImport</RootNamespace>
     <AssemblyName>EmploAdImport</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -37,13 +37,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="IdentityModel, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\IdentityModel.1.11.0\lib\net45\IdentityModel.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -55,32 +50,17 @@
     <Compile Include="AttributeMappingsModel\AttributeMapping.cs" />
     <Compile Include="AttributeMappingsModel\AttributeMappingElement.cs" />
     <Compile Include="AttributeMappingsModel\AttributeMappingSection.cs" />
-    <Compile Include="EmploApi\Models\FinishImportResponseModel.cs" />
-    <Compile Include="EmploApi\Models\FinishImportRequestModel.cs" />
-    <Compile Include="EmploApi\Models\ImportUsersRequestModel.cs" />
-    <Compile Include="EmploApi\Models\ImportUsersResponseModel.cs" />
-    <Compile Include="EmploApi\ApiConfiguration.cs" />
-    <Compile Include="EmploApi\Models\UpdateUnitResult.cs" />
     <Compile Include="Importer\EnumerableExtensions.cs" />
     <Compile Include="Ldap\LdapAccountConfiguration.cs" />
     <Compile Include="Ldap\LdapImportConfiguration.cs" />
-    <Compile Include="EmploApi\ApiClient.cs" />
     <Compile Include="Importer\ImportLogic.cs" />
     <Compile Include="Ldap\LdapClient.cs" />
     <Compile Include="Ldap\PropertyMapping.cs" />
     <Compile Include="Ldap\DirectorySearcherExtension.cs" />
     <Compile Include="Validators\CommandValidator.cs" />
     <Compile Include="Validators\SettingsValidator.cs" />
-    <Compile Include="Log\BaseLogger.cs" />
-    <Compile Include="Log\FileLogger.cs" />
-    <Compile Include="Log\ConsoleLogger.cs" />
-    <Compile Include="Log\ILogger.cs" />
-    <Compile Include="Log\LoggerFactory.cs" />
-    <Compile Include="Log\LogOutput.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="EmploApi\Models\UserDataRow.cs" />
-    <Compile Include="EmploApi\AuthorizationManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
@@ -91,7 +71,12 @@
     </None>
     <None Include="sample-data.json" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\EmploApiSDK\EmploApiSDK.csproj">
+      <Project>{462582b3-f430-4b0e-8e8a-e11005e05d2e}</Project>
+      <Name>EmploApiSDK</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

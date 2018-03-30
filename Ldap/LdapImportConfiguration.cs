@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using EmploAdImport.AttributeMappingsModel;
-using EmploAdImport.Log;
+using EmploApiSDK.Logger;
 
 namespace EmploAdImport.Ldap
 {

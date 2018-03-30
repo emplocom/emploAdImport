@@ -1,7 +1,7 @@
-﻿using System.Linq;
+using System.Linq;
 using EmploAdImport.Validators;
 using System;
-using EmploAdImport.Log;
+using EmploApiSDK.Logger;
 
 namespace EmploAdImport
 {

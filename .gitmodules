@@ -1,0 +1,3 @@
+[submodule "emploApiSdk"]
+	path = emploApiSdk
+	url = https://github.com/emplocom/emploApiSdk

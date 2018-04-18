@@ -4,6 +4,7 @@ using System.DirectoryServices;
 using System.Linq;
 using EmploApiSDK.Logger;
 using EmploApiSDK.Models;
+using System.Security.Principal;
 
 namespace EmploAdImport.Ldap
 {
@@ -56,10 +57,22 @@ namespace EmploAdImport.Ldap
                             // That's why we cannot use Cast instead of loop
                             foreach (var property in searchResult.Properties[mapping.LdapPropertyName])
                             {
-                                // guid is send as array of bytes 
+                                // guid / security identifier is send as array of bytes 
                                 if (property is byte[])
                                 {
-                                    importedEmployeeRow.Add(mapping.EmploPropertyName, new Guid((byte[])property).ToString());
+                                    byte[] valueInBytes = (byte[])property;
+                                    string valueAsString = null;
+
+                                    if (valueInBytes.Length == 16)
+                                    {
+                                        valueAsString = new Guid(valueInBytes).ToString();
+                                    }
+                                    else
+                                    {
+                                        valueAsString = new SecurityIdentifier(valueInBytes, 0).ToString();
+                                    }
+
+                                    importedEmployeeRow.Add(mapping.EmploPropertyName, valueAsString);
                                     continue;
                                 }
 

@@ -134,6 +134,7 @@ namespace EmploAdImport.Importer
             catch (Exception ex)
             {
                 _logger.WriteLine(ex.Message);
+                throw ex;
             }
         }
 

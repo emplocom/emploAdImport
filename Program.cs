@@ -31,6 +31,7 @@ namespace EmploAdImport
             catch (Exception ex)
             {
                 logger.WriteLine(ex.Message);
+                throw ex;
             }           
         }
     }

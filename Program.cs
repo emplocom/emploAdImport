@@ -16,7 +16,7 @@ namespace EmploAdImport
 
             try
             {
-                var importLogic = new Importer.ImportLogic(logger);
+                var importLogic = new Importer.EmployeeAdImportLogic(logger);
                 if (args.Any())
                 {
                     CommandValidator.ValidateUserCommand(args);

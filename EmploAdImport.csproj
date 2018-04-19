@@ -47,7 +47,6 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.DirectoryServices" />
-    <Reference Include="System.IdentityModel" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AttributeMappingsModel\AttributeMapping.cs" />
@@ -56,7 +55,7 @@
     <Compile Include="Importer\EnumerableExtensions.cs" />
     <Compile Include="Ldap\LdapAccountConfiguration.cs" />
     <Compile Include="Ldap\LdapImportConfiguration.cs" />
-    <Compile Include="Importer\ImportLogic.cs" />
+    <Compile Include="Importer\EmployeeAdImportLogic.cs" />
     <Compile Include="Ldap\LdapClient.cs" />
     <Compile Include="Ldap\PropertyMapping.cs" />
     <Compile Include="Ldap\DirectorySearcherExtension.cs" />
@@ -75,7 +74,7 @@
     <None Include="sample-data.json" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EmploApiSDK\EmploApiSDK.csproj">
+    <ProjectReference Include="emploApiSdk\EmploApiSDK.csproj">
       <Project>{462582b3-f430-4b0e-8e8a-e11005e05d2e}</Project>
       <Name>EmploApiSDK</Name>
     </ProjectReference>

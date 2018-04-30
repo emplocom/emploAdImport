@@ -1,7 +1,7 @@
 using System;
 using System.Configuration;
-using EmploAdImport.AttributeMappingsModel;
 using EmploApiSDK.Logger;
+using EmploApiSDK.Logic.EmployeeImport;
 
 namespace EmploAdImport.Validators
 {
@@ -66,8 +66,7 @@ namespace EmploAdImport.Validators
                 isValid = false;
             }
 
-            var claimConfigSection = ConfigurationManager.GetSection(AttributeMappingSection.SectionName) as AttributeMappingSection;
-            if (claimConfigSection == null || claimConfigSection.Instances.Count < 5)
+            if (!(ConfigurationManager.GetSection(AttributeMappingSection.SectionName) is AttributeMappingSection claimConfigSection) || claimConfigSection.Instances.Count < 5)
             {
                 LoggerFactory.Instance.WriteLine("Configuration section " + AttributeMappingSection.SectionName + " does not contain at least 5 entries. Use this section for attributes mapping. NameId, Email, FirstName, LastName and Position are required");
                 isValid = false;

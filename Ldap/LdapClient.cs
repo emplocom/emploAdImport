@@ -19,9 +19,17 @@ namespace EmploAdImport.Ldap
 
         public List<UserDataRow> GetDataToImportFromLdap()
         {
-            var ldapImportConfiguration = new LdapImportConfiguration(_logger);
-            var dataRowsFromLdap = ImportDataRowsFromLdap(ldapImportConfiguration);
-            return dataRowsFromLdap.ToList();
+            try
+            {
+                var ldapImportConfiguration = new LdapImportConfiguration(_logger);
+                var dataRowsFromLdap = ImportDataRowsFromLdap(ldapImportConfiguration);
+                return dataRowsFromLdap.ToList();
+            }
+            catch (EmploApiClientFatalException)
+            {
+                Environment.Exit(-1);
+                return null;
+            }
         }
 
         private IEnumerable<UserDataRow> ImportDataRowsFromLdap(LdapImportConfiguration importConfig)
@@ -30,7 +38,7 @@ namespace EmploAdImport.Ldap
             {
                 using (var search = new DirectorySearcher(startingPoint) { Filter = importConfig.Query })
                 {
-                    foreach (var mapping in importConfig.PropertyMappings.Select(m => m.LdapPropertyName))
+                    foreach (var mapping in importConfig.PropertyMappings.Select(m => m.ExternalPropertyName))
                     {
                         search.PropertiesToLoad.Add(mapping);
                     }
@@ -48,14 +56,14 @@ namespace EmploAdImport.Ldap
                         {
                             // mapping is defined (value is expected), but there is no value in AD, 
                             // send info about "no value" to emplo
-                            if (!searchResult.Properties.Contains(mapping.LdapPropertyName))
+                            if (!searchResult.Properties.Contains(mapping.ExternalPropertyName))
                             {
                                 importedEmployeeRow.Add(mapping.EmploPropertyName, "");
                             }
 
                             // Not always string valus will be sent from LDAP, for example 'whenCreated' is DateTime
                             // That's why we cannot use Cast instead of loop
-                            foreach (var property in searchResult.Properties[mapping.LdapPropertyName])
+                            foreach (var property in searchResult.Properties[mapping.ExternalPropertyName])
                             {
                                 // guid / security identifier is send as array of bytes 
                                 if (property is byte[])

@@ -5,6 +5,7 @@ using System.Linq;
 using EmploApiSDK.Logger;
 using System.Security.Principal;
 using EmploApiSDK.ApiModels.Employees;
+using EmploApiSDK.Logic.EmployeeImport;
 
 namespace EmploAdImport.Ldap
 {
@@ -54,37 +55,17 @@ namespace EmploAdImport.Ldap
 
                         foreach (var mapping in importConfig.PropertyMappings)
                         {
-                            // mapping is defined (value is expected), but there is no value in AD, 
-                            // send info about "no value" to emplo
-                            if (!searchResult.Properties.Contains(mapping.ExternalPropertyName))
+                            switch (mapping.EmploPropertyName)
                             {
-                                importedEmployeeRow.Add(mapping.EmploPropertyName, "");
-                            }
-
-                            // Not always string valus will be sent from LDAP, for example 'whenCreated' is DateTime
-                            // That's why we cannot use Cast instead of loop
-                            foreach (var property in searchResult.Properties[mapping.ExternalPropertyName])
-                            {
-                                // guid / security identifier is send as array of bytes 
-                                if (property is byte[])
-                                {
-                                    byte[] valueInBytes = (byte[])property;
-                                    string valueAsString = null;
-
-                                    if (valueInBytes.Length == 16)
-                                    {
-                                        valueAsString = new Guid(valueInBytes).ToString();
-                                    }
-                                    else
-                                    {
-                                        valueAsString = new SecurityIdentifier(valueInBytes, 0).ToString();
-                                    }
-
-                                    importedEmployeeRow.Add(mapping.EmploPropertyName, valueAsString);
-                                    continue;
-                                }
-
-                                importedEmployeeRow.Add(mapping.EmploPropertyName, property.ToString());
+                                case "PermissionRole":
+                                    PermissionRoleMappingOperation(importedEmployeeRow, searchResult, mapping);
+                                    break;
+                                case "OrganizationalUnits":
+                                    OrganizationalUnitsMappingOperation(importedEmployeeRow, searchResult, mapping);
+                                    break;
+                                default:
+                                    DefaultRowMappingOperation(importedEmployeeRow, searchResult, mapping);
+                                    break;
                             }
                         }
 
@@ -102,6 +83,100 @@ namespace EmploAdImport.Ldap
 
                     return importedRows;
                 }
+            }
+        }
+
+        private void OrganizationalUnitsMappingOperation(UserDataRow importedEmployeeRow, SearchResult searchResult, PropertyMapping mapping)
+        {
+            string distinguishedName;
+            var property = searchResult.Properties[mapping.ExternalPropertyName][0];
+            if (property is byte[])
+            {
+                distinguishedName = new SecurityIdentifier((byte[])property, 0).ToString();
+            }
+            else
+            {
+                distinguishedName = property.ToString();
+            }
+            
+            var organizationalUnitCollection =
+                    distinguishedName.Split(',')
+                    .Select(pathNode => pathNode.Split('='))
+                    .Where(splitPathNode => splitPathNode[0].Equals("OU"))
+                    .Select(splitPathNode => splitPathNode[1]);
+
+            if (organizationalUnitCollection.Any())
+            {
+                importedEmployeeRow.Add(mapping.EmploPropertyName, string.Join(",", organizationalUnitCollection));
+            }
+            else
+            {
+                importedEmployeeRow.Add(mapping.EmploPropertyName, string.Empty);
+            }
+        }
+
+        private void PermissionRoleMappingOperation(UserDataRow importedEmployeeRow, SearchResult searchResult, PropertyMapping mapping)
+        {
+            string distinguishedName;
+            var property = searchResult.Properties[mapping.ExternalPropertyName][0];
+            if (property is byte[])
+            {
+                distinguishedName = new SecurityIdentifier((byte[])property, 0).ToString();
+            }
+            else
+            {
+                distinguishedName = property.ToString();
+            }
+
+            var organizationalUnitCollection = 
+                    distinguishedName.Split(',')
+                    .Select(pathNode => pathNode.Split('='))
+                    .Where(splitPathNode => splitPathNode[0].Equals("OU"))
+                    .Select(splitPathNode => splitPathNode[1]);
+
+            if (organizationalUnitCollection.Any())
+            {
+                importedEmployeeRow.Add(mapping.EmploPropertyName, organizationalUnitCollection.First());
+            }
+            else
+            {
+                importedEmployeeRow.Add(mapping.EmploPropertyName, string.Empty);
+            }
+        }
+
+        private void DefaultRowMappingOperation(UserDataRow importedEmployeeRow, SearchResult searchResult, PropertyMapping mapping)
+        {
+            // mapping is defined (value is expected), but there is no value in AD, 
+            // send info about "no value" to emplo
+            if (!searchResult.Properties.Contains(mapping.ExternalPropertyName))
+            {
+                importedEmployeeRow.Add(mapping.EmploPropertyName, "");
+            }
+
+            // Not always string valus will be sent from LDAP, for example 'whenCreated' is DateTime
+            // That's why we cannot use Cast instead of loop
+            foreach (var property in searchResult.Properties[mapping.ExternalPropertyName])
+            {
+                // guid / security identifier is send as array of bytes 
+                if (property is byte[])
+                {
+                    byte[] valueInBytes = (byte[])property;
+                    string valueAsString = null;
+
+                    if (valueInBytes.Length == 16)
+                    {
+                        valueAsString = new Guid(valueInBytes).ToString();
+                    }
+                    else
+                    {
+                        valueAsString = new SecurityIdentifier(valueInBytes, 0).ToString();
+                    }
+
+                    importedEmployeeRow.Add(mapping.EmploPropertyName, valueAsString);
+                    continue;
+                }
+
+                importedEmployeeRow.Add(mapping.EmploPropertyName, property.ToString());
             }
         }
 

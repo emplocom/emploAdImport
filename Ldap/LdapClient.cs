@@ -44,6 +44,12 @@ namespace EmploAdImport.Ldap
                         search.PropertiesToLoad.Add(mapping);
                     }
 
+                    if (importConfig.PropertyMappings.Select(m => m.ExternalPropertyName).Any(m =>
+                        new List<string> { SpecialProperties.FirstOrganizationalUnit, SpecialProperties.OrganizationalUnitsList }.Contains(m)))
+                    {
+                        search.PropertiesToLoad.Add("distinguishedName");
+                    }
+
                     _logger.WriteLine("Getting users' data from Active Directory...");
                     search.PageSize = 1000;
                     var resultCollection = search.SafeFindAll();
@@ -55,13 +61,13 @@ namespace EmploAdImport.Ldap
 
                         foreach (var mapping in importConfig.PropertyMappings)
                         {
-                            switch (mapping.EmploPropertyName)
+                            switch (mapping.ExternalPropertyName)
                             {
-                                case "PermissionRole":
-                                    PermissionRoleMappingOperation(importedEmployeeRow, searchResult, mapping);
+                                case SpecialProperties.FirstOrganizationalUnit:
+                                    FirstOrganizationalUnitMappingOperation(importedEmployeeRow, searchResult, mapping);
                                     break;
-                                case "OrganizationalUnits":
-                                    OrganizationalUnitsMappingOperation(importedEmployeeRow, searchResult, mapping);
+                                case SpecialProperties.OrganizationalUnitsList:
+                                    OrganizationalUnitsListMappingOperation(importedEmployeeRow, searchResult, mapping);
                                     break;
                                 default:
                                     DefaultRowMappingOperation(importedEmployeeRow, searchResult, mapping);
@@ -86,10 +92,10 @@ namespace EmploAdImport.Ldap
             }
         }
 
-        private void OrganizationalUnitsMappingOperation(UserDataRow importedEmployeeRow, SearchResult searchResult, PropertyMapping mapping)
+        private void OrganizationalUnitsListMappingOperation(UserDataRow importedEmployeeRow, SearchResult searchResult, PropertyMapping mapping)
         {
             string distinguishedName;
-            var property = searchResult.Properties[mapping.ExternalPropertyName][0];
+            var property = searchResult.Properties["distinguishedName"][0];
             if (property is byte[])
             {
                 distinguishedName = new SecurityIdentifier((byte[])property, 0).ToString();
@@ -98,12 +104,13 @@ namespace EmploAdImport.Ldap
             {
                 distinguishedName = property.ToString();
             }
-            
+
+            //Example: CN=Arlene Huff,OU=Admin (HR-PR department),OU=Admin (HR department),OU=Admin (administration department),DC=ad-master,DC=emplo-master,DC=local
             var organizationalUnitCollection =
                     distinguishedName.Split(',')
                     .Select(pathNode => pathNode.Split('='))
                     .Where(splitPathNode => splitPathNode[0].Equals("OU"))
-                    .Select(splitPathNode => splitPathNode[1]);
+                    .Select(splitPathNode => splitPathNode[1]).ToList();
 
             if (organizationalUnitCollection.Any())
             {
@@ -115,10 +122,10 @@ namespace EmploAdImport.Ldap
             }
         }
 
-        private void PermissionRoleMappingOperation(UserDataRow importedEmployeeRow, SearchResult searchResult, PropertyMapping mapping)
+        private void FirstOrganizationalUnitMappingOperation(UserDataRow importedEmployeeRow, SearchResult searchResult, PropertyMapping mapping)
         {
             string distinguishedName;
-            var property = searchResult.Properties[mapping.ExternalPropertyName][0];
+            var property = searchResult.Properties["distinguishedName"][0];
             if (property is byte[])
             {
                 distinguishedName = new SecurityIdentifier((byte[])property, 0).ToString();
@@ -128,15 +135,16 @@ namespace EmploAdImport.Ldap
                 distinguishedName = property.ToString();
             }
 
-            var organizationalUnitCollection = 
+            //Example: CN=Arlene Huff,OU=Admin (HR-PR department),OU=Admin (HR department),OU=Admin (administration department),DC=ad-master,DC=emplo-master,DC=local
+            var organizationalUnitsList = 
                     distinguishedName.Split(',')
                     .Select(pathNode => pathNode.Split('='))
                     .Where(splitPathNode => splitPathNode[0].Equals("OU"))
-                    .Select(splitPathNode => splitPathNode[1]);
+                    .Select(splitPathNode => splitPathNode[1]).ToList();
 
-            if (organizationalUnitCollection.Any())
+            if (organizationalUnitsList.Any())
             {
-                importedEmployeeRow.Add(mapping.EmploPropertyName, organizationalUnitCollection.First());
+                importedEmployeeRow.Add(mapping.EmploPropertyName, organizationalUnitsList.First());
             }
             else
             {

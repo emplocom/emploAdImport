@@ -64,6 +64,7 @@
     <Compile Include="Importer\EmployeeAdImportLogic.cs" />
     <Compile Include="Ldap\LdapClient.cs" />
     <Compile Include="Ldap\DirectorySearcherExtension.cs" />
+    <Compile Include="Ldap\SpecialProperties.cs" />
     <Compile Include="Validators\CommandValidator.cs" />
     <Compile Include="Validators\SettingsValidator.cs" />
     <Compile Include="Program.cs" />

@@ -27,3 +27,7 @@ TMSImageService/imagecache
 /TMS/Content/tms/_css/tms2.min.css
 IdentityServer/.vs/config/applicationhost.config
 /packages
+/.vs/EmploAdImport/v15/Server/sqlite3/db.lock
+/.vs/EmploAdImport/v15/Server/sqlite3/storage.ide
+/.vs/EmploAdImport/v15/Server/sqlite3/storage.ide-shm
+/.vs/EmploAdImport/v15/Server/sqlite3/storage.ide-wal

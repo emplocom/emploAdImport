@@ -1,6 +1,7 @@
 using System.Linq;
 using EmploAdImport.Validators;
 using System;
+using System.Net;
 using EmploApiSDK.Logger;
 
 namespace EmploAdImport
@@ -13,7 +14,7 @@ namespace EmploAdImport
             logger.WriteLine("Import to emplo started");
 
             SettingsValidator.ValidateSettings();
-
+            System.Net.ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
             try
             {
                 var importLogic = new Importer.EmployeeAdImportLogic(logger);

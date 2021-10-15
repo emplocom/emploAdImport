@@ -10,6 +10,7 @@ using EmploApiSDK.Logger;
 using EmploApiSDK.ApiModels.Employees;
 using EmploApiSDK.Client;
 using EmploApiSDK.Logic.EmployeeImport;
+using System.Text.RegularExpressions;
 
 namespace EmploAdImport.Importer
 {
@@ -35,7 +36,7 @@ namespace EmploAdImport.Importer
             _apiClient = new ApiClient(_logger, _apiConfiguration);
             _importLogic = new ImportLogic(logger);
         }
-         
+
         public void ImportUsers()
         {
             try
@@ -74,6 +75,7 @@ namespace EmploAdImport.Importer
                     Environment.Exit(0);
                 }
 
+                TransformFields(importUsersRequestModel);
                 var result = _importLogic.ImportEmployees(importUsersRequestModel).Result;
                 if (result == -1)
                 {
@@ -93,5 +95,36 @@ namespace EmploAdImport.Importer
             var statusCode = _apiClient.SendPost<HttpStatusCode>(JsonConvert.SerializeObject(nameId), _apiConfiguration.BlockUserUrl);
             _logger.WriteLine("Response: " + statusCode);
         }
+
+        public void TransformFields(ImportUsersRequestModel model)
+        {
+            foreach (var row in model.Rows)
+            {
+                TransformOfficeAddress(row);
+            }
+        }
+
+        private void TransformOfficeAddress(UserDataRow row)
+        {
+            string[] officeAddresses = new string[4];
+
+            row.TryGetValue("OfficeAddress", out officeAddresses[0]);
+            for (int i = 1; i < 4; i++)
+            {
+                string address = null;
+                if (row.TryGetValue($"OfficeAddress_{i}", out address))
+                {
+                    row.Remove($"OfficeAddress_{i}");
+                }
+                officeAddresses[i] = address;
+            }
+
+            if (officeAddresses.Any(x => x != null && x != ""))
+            {
+                var officeAddress = string.Join(" ", officeAddresses.Where(x => x != null));
+                row["OfficeAddress"] = officeAddress.Trim();
+            }
+        }
+
     }
 }

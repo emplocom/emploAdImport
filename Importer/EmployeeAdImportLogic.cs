@@ -101,6 +101,7 @@ namespace EmploAdImport.Importer
             foreach (var row in model.Rows)
             {
                 TransformOfficeAddress(row);
+                TransformEmployeeExternalSystems(row);
             }
         }
 
@@ -124,6 +125,29 @@ namespace EmploAdImport.Importer
                 var officeAddress = string.Join(" ", officeAddresses.Where(x => x != null));
                 row["OfficeAddress"] = officeAddress.Trim();
             }
+        }
+
+        private void TransformEmployeeExternalSystems(UserDataRow row)
+        {
+            var externalSystemIds = row.Keys.ToList().Where(x => x.StartsWith("ExternalSystemId_"));
+            var entries = new List<ExternalSystemIdModel>();
+            foreach(var x in externalSystemIds)
+            {
+                var externalSystemId = x.Replace("ExternalSystemId_", "");
+                var externalId = row[x];
+                row.Remove(x);
+
+                var entry = new ExternalSystemIdModel
+                {
+                    ExternalId = externalId,
+                    ExternalSystemId = Int32.Parse(externalSystemId)
+                };
+
+                entries.Add(entry);
+                
+            }
+
+            row["ExternalSystemIds"] = JsonConvert.SerializeObject(entries);
         }
 
     }

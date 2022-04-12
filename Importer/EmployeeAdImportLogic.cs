@@ -131,23 +131,27 @@ namespace EmploAdImport.Importer
         {
             var externalSystemIds = row.Keys.ToList().Where(x => x.StartsWith("ExternalSystemId_"));
             var entries = new List<ExternalSystemIdModel>();
-            foreach(var x in externalSystemIds)
+            foreach (var x in externalSystemIds)
             {
                 var externalSystemId = x.Replace("ExternalSystemId_", "");
                 var externalId = row[x];
                 row.Remove(x);
 
-                var entry = new ExternalSystemIdModel
+                if (externalId.Any() && int.TryParse(externalSystemId, out int externalSystemIdParsed))
                 {
-                    ExternalId = externalId,
-                    ExternalSystemId = Int32.Parse(externalSystemId)
-                };
-
-                entries.Add(entry);
-                
+                    var entry = new ExternalSystemIdModel
+                    {
+                        ExternalId = externalId,
+                        ExternalSystemId = externalSystemIdParsed
+                    };
+                    entries.Add(entry);
+                }
             }
 
-            row["ExternalSystemIds"] = JsonConvert.SerializeObject(entries);
+            if (entries.Any())
+            {
+                row["ExternalSystemIds"] = JsonConvert.SerializeObject(entries);
+            }
         }
 
     }

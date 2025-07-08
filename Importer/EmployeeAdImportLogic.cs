@@ -102,6 +102,7 @@ namespace EmploAdImport.Importer
             {
                 TransformOfficeAddress(row);
                 TransformEmployeeExternalSystems(row);
+                TransformCustomFields(row);
             }
         }
 
@@ -150,5 +151,27 @@ namespace EmploAdImport.Importer
             row["ExternalSystemIds"] = JsonConvert.SerializeObject(entries);
         }
 
+        private void TransformCustomFields(UserDataRow row)
+        {
+            var customFields = row.Keys.ToList().Where(x => x.StartsWith("CustomField_"));
+            var entries = new List<CustomFieldImportModel>();
+            foreach (var x in customFields)
+            {
+                var customFieldId = x.Replace("CustomField_", "");
+                var fieldValue = row[x];
+                row.Remove(x);
+
+                var entry = new CustomFieldImportModel
+                {
+                    Value = fieldValue,
+                    Id = int.Parse(customFieldId)
+                };
+
+                entries.Add(entry);
+
+            }
+
+            row["CustomFields"] = JsonConvert.SerializeObject(entries);
+        }
     }
 }

@@ -1,0 +1,30 @@
+﻿[
+  {
+    "NameId": "user.one.old@mycompany.com",
+    "Email": "user.one.old@mycompany.com",
+    "FirstName": "User",
+    "LastName": "OneOld",
+    "ManagerDistinguishedName": "",
+    "DistinguishedName": "CN=User OneOld,CN=Users,DC=mycompany,DC=com",
+    "Position": "Manager",
+    "OfficeAddress": "MyCity, 2nd floor",
+    "Company": "My Company",
+    "Unit": "Team 001",
+    "EmploymentDate": "2010-01-01",
+    "UnitPath": "T001"
+  },
+  {
+    "NameId": "user.two.old@mycompany.com",
+    "Email": "user.two.old@mycompany.com",
+    "FirstName": "User",
+    "LastName": "TwoOld",
+    "ManagerDistinguishedName": "CN=User OneOld,CN=Users,DC=mycompany,DC=com",
+    "DistinguishedName": "CN=User TwoOld,CN=Users,DC=mycompany,DC=com",
+    "Position": "Specialist",
+    "OfficeAddress": "MyCity, 1st floor",
+    "Company": "My Company",
+    "Unit": "Team 002",
+    "EmploymentDate": "2015-01-01",
+    "UnitPath": "T001-T002"
+  }
+]
